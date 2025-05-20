@@ -28,7 +28,7 @@ folder = os.path.join("landmarks_data", current_letter) # Creamos la carpeta don
 os.makedirs(folder, exist_ok=True) # Si la carpeta ya existe, no hacemos nada
 
 # === ACTIVAR CÁMARA ===
-cap = cv2.VideoCapture(1) # Inicializamos la cámara (0 para la cámara integrada, 1 para una externa(usb))
+cap = cv2.VideoCapture(1) # Inicializamos la cámara (0 para la cámara integrada, 1 para una externa usb)
 count = 0 # Contador de muestras
 total = 100  # Número total de muestras a capturar. 100 vectores por letra
 
