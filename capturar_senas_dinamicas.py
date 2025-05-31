@@ -46,7 +46,9 @@ sample_count = len(os.listdir(folder))
 cap = cv2.VideoCapture(0)
 print("📸 Posicioná la mano. Presioná 'c' para comenzar o 'q' para salir.")
 
-captura_activada = False
+captura_activada = False # Variable para controlar si se está capturando o no
+secuencia = []  # Lista para almacenar vectores de landmarks
+frames_para_gif = []  # Lista para almacenar los frames reales para el GIF
 contador_sec = 0
 
 # === BUCLE PRINCIPAL ===
