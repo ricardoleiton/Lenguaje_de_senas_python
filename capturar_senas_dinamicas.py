@@ -2,113 +2,129 @@
 # === capturar_senas_dinamicas.py ===
 # Este script permite capturar secuencias de video para entrenar un modelo de gestos dinámicos.
 # Utiliza MediaPipe para detectar landmarks de la mano y guarda las secuencias como vectores .npy.
+# ADEMÁS, genera automáticamente un GIF usando los frames reales captados por la cámara (para uso educativo con profesionales de lenguaje de señas).
 
-import cv2 # Importa la librería OpenCV para manejo de video y procesamiento de imágenes.
-import os # Importa la librería os para interactuar con el sistema operativo (crear carpetas, etc.).
-import numpy as np # Importa la librería numpy para manejo eficiente de arrays numéricos.
-import mediapipe as mp # Importa la librería MediaPipe para detección de landmarks.
+import cv2  # Importa la librería OpenCV para manejo de video y procesamiento de imágenes.
+import os  # Importa la librería os para interactuar con el sistema operativo (crear carpetas, etc.).
+import numpy as np  # Importa la librería numpy para manejo eficiente de arrays numéricos.
+import mediapipe as mp  # Importa la librería MediaPipe para detección de landmarks.
+from PIL import Image  # Para manipular imágenes y guardar GIFs.
 
 # === CONFIGURACIÓN GENERAL ===
-SECUENCIA_FRAMES = 30 # Define el número de frames por cada secuencia de gesto a capturar.
-CANTIDAD_SECUENCIAS = 20 # Define la cantidad total de secuencias a capturar por cada gesto.
-DATA_DIR = "senas_dinamicas" # Define el nombre del directorio donde se guardarán los datos capturados.
+SECUENCIA_FRAMES = 30  # Define el número de frames por cada secuencia de gesto a capturar.
+CANTIDAD_SECUENCIAS = 20  # Define la cantidad total de secuencias a capturar por cada gesto.
+DATA_DIR = "senas_dinamicas"  # Define el nombre del directorio donde se guardarán los datos capturados.
 
 # === INICIAR DETECTOR DE MANOS ===
-mp_hands = mp.solutions.hands # Accede a la solución de detección de manos de MediaPipe.
-# Inicializa el modelo de detección de manos.
-# static_image_mode=False: Modo para procesamiento de video (más rápido).
-# max_num_hands=2: Detecta hasta 2 manos.
-hands = mp_hands.Hands(static_image_mode=False, max_num_hands=2)
-mp_draw = mp.solutions.drawing_utils # Accede a las utilidades de dibujo de MediaPipe para visualizar landmarks.
+mp_hands = mp.solutions.hands  # Accede a la solución de detección de manos de MediaPipe.
+hands = mp_hands.Hands(static_image_mode=False, max_num_hands=2)  # Inicializa el modelo de detección de manos.
+mp_draw = mp.solutions.drawing_utils  # Accede a las utilidades de dibujo de MediaPipe para visualizar landmarks.
+
+# === FUNCIÓN PARA GENERAR GIF DESDE LOS FRAMES REALES ===
+def generar_gif_desde_frames(frames, ruta_gif):
+    """
+    Genera un GIF animado a partir de los frames reales capturados por la cámara.
+    """
+    gif_frames = [Image.fromarray(cv2.cvtColor(f, cv2.COLOR_BGR2RGB)).resize((300, 300)) for f in frames]
+    os.makedirs("gifs", exist_ok=True)
+    gif_frames[0].save(ruta_gif, save_all=True, append_images=gif_frames[1:], duration=50, loop=0)
+    print(f"🎞️ GIF generado desde cámara: {ruta_gif}")
 
 # === INGRESAR NOMBRE DEL GESTO ===
-while True: # Bucle para solicitar y validar el nombre del gesto.
-    gesto = input("▶ Ingresá la palabra o frase a capturar (sin espacios): ").lower() # Solicita al usuario el nombre del gesto y lo convierte a minúsculas.
-    if gesto.isalpha(): # Verifica si la entrada consiste solo en letras.
-        break # Si es válido, sale del bucle.
-    print("❌ Entrada inválida. Solo letras, sin espacios ni números.") # Muestra un mensaje de error si la entrada es inválida.
+while True:
+    gesto = input("▶ Ingresá la palabra o frase a capturar (sin espacios): ").lower()
+    if gesto.isalpha():
+        break
+    print("❌ Entrada inválida. Solo letras, sin espacios ni números.")
 
 # === CREAR CARPETA PARA EL GESTO ===
-folder = os.path.join(DATA_DIR, gesto) # Construye la ruta completa de la carpeta para el gesto.
-os.makedirs(folder, exist_ok=True) # Crea la carpeta si no existe.
-sample_count = len(os.listdir(folder)) # Cuenta cuántas secuencias ya existen en la carpeta para nombrar las nuevas.
+folder = os.path.join(DATA_DIR, gesto)
+os.makedirs(folder, exist_ok=True)
+sample_count = len(os.listdir(folder))
 
 # === INICIAR CÁMARA ===
-cap = cv2.VideoCapture(0) # Inicializa la captura de video desde la cámara predeterminada (índice 0).
-print("📸 Posicioná la mano. Presioná 'c' para comenzar o 'q' para salir.") # Instrucciones para el usuario.
+cap = cv2.VideoCapture(0)
+print("📸 Posicioná la mano. Presioná 'c' para comenzar o 'q' para salir.")
 
-captura_activada = False # Bandera para controlar si la captura automática está activa.
-contador_sec = 0 # Contador para llevar el registro de las secuencias guardadas en la sesión actual.
+captura_activada = False
+contador_sec = 0
 
 # === BUCLE PRINCIPAL ===
-while True: # Bucle principal para procesar los frames de la cámara.
-    ret, frame = cap.read() # Lee un frame de la cámara. 'ret' es True si la lectura fue exitosa, 'frame' es la imagen.
-    if not ret: # Si no se pudo leer el frame, sale del bucle.
+while True:
+    ret, frame = cap.read()
+    if not ret:
         break
 
-    frame = cv2.flip(frame, 1) # Voltea el frame horizontalmente (efecto espejo).
-    mensaje = f"Gesto: {gesto} - Secuencias guardadas: {contador_sec}/{CANTIDAD_SECUENCIAS}" # Crea el mensaje de estado.
-    instrucciones = "Presiona 'c' para capturar | 'q' para salir" # Crea el mensaje de instrucciones.
-    # Muestra el mensaje de estado en el frame.
+    frame = cv2.flip(frame, 1)
+    mensaje = f"Gesto: {gesto} - Secuencias guardadas: {contador_sec}/{CANTIDAD_SECUENCIAS}"
+    instrucciones = "Presiona 'c' para capturar | 'q' para salir"
     cv2.putText(frame, mensaje, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
-    # Muestra el mensaje de instrucciones en el frame.
     cv2.putText(frame, instrucciones, (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 200, 200), 2)
 
-    # === CAPTURA AUTOMÁTICA ===
-    # Verifica si la captura está activada y si aún no se ha alcanzado la cantidad deseada de secuencias.
     if captura_activada and contador_sec < CANTIDAD_SECUENCIAS:
-        secuencia = [] # Inicializa una lista para almacenar los vectores de landmarks de la secuencia actual.
-        for _ in range(SECUENCIA_FRAMES): # Bucle para capturar los frames de una secuencia.
-            ret, frame_temp = cap.read() # Lee un frame temporal para la secuencia.
-            if not ret: # Si no se pudo leer el frame, sale del bucle de secuencia.
+        secuencia = []  # Lista para almacenar vectores de landmarks
+        frames_para_gif = []  # Lista para almacenar los frames reales para el GIF
+
+        for _ in range(SECUENCIA_FRAMES):
+            ret, frame_temp = cap.read()
+            if not ret:
                 break
 
-            frame_temp = cv2.flip(frame_temp, 1) # Voltea el frame temporal.
-            rgb = cv2.cvtColor(frame_temp, cv2.COLOR_BGR2RGB) # Convierte el frame a formato RGB (necesario para MediaPipe).
-            result = hands.process(rgb) # Procesa el frame con el modelo de detección de manos de MediaPipe.
+            frame_temp = cv2.flip(frame_temp, 1)
+            rgb = cv2.cvtColor(frame_temp, cv2.COLOR_BGR2RGB)
+            result = hands.process(rgb)
 
-            vector = np.zeros(63) # Inicializa un vector numpy de ceros para almacenar los landmarks (21 landmarks * 3 coordenadas = 63).
-            if result.multi_hand_landmarks: # Verifica si se detectaron manos en el frame.
-                for hand_landmarks in result.multi_hand_landmarks: # Itera sobre cada mano detectada.
-                    temp = [] # Lista temporal para almacenar las coordenadas de los landmarks de una mano.
-                    for lm in hand_landmarks.landmark: # Itera sobre cada landmark de la mano.
-                        temp.extend([lm.x, lm.y, lm.z]) # Añade las coordenadas x, y, z del landmark a la lista temporal.
-                    vector = np.array(temp) # Convierte la lista temporal a un array numpy y lo asigna al vector.
+            vector = np.zeros(63)
+            if result.multi_hand_landmarks:
+                for hand_landmarks in result.multi_hand_landmarks:
+                    temp = []
+                    for lm in hand_landmarks.landmark:
+                        temp.extend([lm.x, lm.y, lm.z])
+                    vector = np.array(temp)
 
-            secuencia.append(vector) # Añade el vector de landmarks del frame actual a la secuencia.
-            cv2.imshow("Capturando...", frame_temp) # Muestra el frame temporal en una ventana separada durante la captura.
+            secuencia.append(vector)
+            frames_para_gif.append(frame_temp.copy())
 
-            # Permite interrumpir la captura de secuencia presionando 'q'.
+            # Mostrar el frame de captura en la misma ventana principal
+            mensaje = f"Gesto: {gesto} - Capturando {len(secuencia)}/{SECUENCIA_FRAMES}"
+            cv2.putText(frame_temp, mensaje, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+            cv2.imshow("Vista previa", frame_temp)
+
             if cv2.waitKey(1) & 0xFF == ord('q'):
-                print("🚫 Captura interrumpida.") # Mensaje de interrupción.
-                captura_activada = False # Desactiva la captura automática.
-                break # Sale del bucle de secuencia.
+                print("🚫 Captura interrumpida.")
+                captura_activada = False
+                break
 
-        if len(secuencia) == SECUENCIA_FRAMES: # Verifica si la secuencia capturada tiene el número correcto de frames.
-            # Guarda la secuencia como un archivo .npy en la carpeta del gesto.
-            np.save(os.path.join(folder, f"{gesto}_{sample_count}.npy"), np.array(secuencia))
-            print(f"[✔] Secuencia guardada: {gesto}_{sample_count}.npy") # Mensaje de confirmación de guardado.
-            sample_count += 1 # Incrementa el contador de secuencias guardadas para el nombre del archivo.
-            contador_sec += 1 # Incrementa el contador de secuencias guardadas en la sesión actual.
+        if len(secuencia) == SECUENCIA_FRAMES:
+            nombre_archivo = f"{gesto}_{sample_count}.npy"
+            np.save(os.path.join(folder, nombre_archivo), np.array(secuencia))
+            print(f"[✔] Secuencia guardada: {nombre_archivo}")
+            sample_count += 1
+            contador_sec += 1
+
+            # === GENERAR GIF DESDE LOS FRAMES REALES ===
+            if contador_sec == 1:
+                ruta_gif = os.path.join("gifs", f"{gesto}.gif")
+                generar_gif_desde_frames(frames_para_gif, ruta_gif)
         else:
-            print("❌ Secuencia incompleta.") # Mensaje si la secuencia no tiene el número esperado de frames.
+            print("❌ Secuencia incompleta.")
 
-        if contador_sec >= CANTIDAD_SECUENCIAS: # Verifica si se ha alcanzado la cantidad total de secuencias deseadas.
-            print("✅ Captura completa.") # Mensaje de captura completa.
-            captura_activada = False # Desactiva la captura automática.
+        if contador_sec >= CANTIDAD_SECUENCIAS:
+            print("✅ Captura completa.")
+            captura_activada = False
+    else:
+        cv2.imshow("Vista previa", frame)
 
-    cv2.imshow("Vista previa", frame) # Muestra el frame actual de la cámara en la ventana principal.
-    key = cv2.waitKey(1) & 0xFF # Espera 1 ms por una pulsación de tecla.
-
-    if key == ord('c'): # Si la tecla presionada es 'c'.
-        captura_activada = True # Activa la bandera de captura automática.
-        print("⏳ Iniciando captura automática...") # Mensaje de inicio de captura.
-    elif key == ord('q'): # Si la tecla presionada es 'q'.
-        print("🚪 Saliendo por solicitud del usuario.") # Mensaje de salida.
-        break # Sale del bucle principal.
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord('c'):
+        captura_activada = True
+        print("⏳ Iniciando captura automática...")
+    elif key == ord('q'):
+        print("🚪 Saliendo por solicitud del usuario.")
+        break
 
 # === LIBERAR RECURSOS ===
-cap.release() # Libera el recurso de la cámara.
-cv2.destroyAllWindows() # Cierra todas las ventanas de OpenCV.
-hands.close() # Cierra el modelo de detección de manos de MediaPipe.
-print("👋 Finalizado.") # Mensaje de finalización del script.
+cap.release()
+cv2.destroyAllWindows()
+hands.close()
+print("👋 Finalizado.")
