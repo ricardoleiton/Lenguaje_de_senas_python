@@ -33,14 +33,15 @@ Ideal para aplicaciones educativas o inclusivas en el reconocimiento del lenguaj
 
 ## 🚀 Tecnologías Utilizadas
 
-- Python 🐍
-- OpenCV 🎥
-- MediaPipe ✋
-- NumPy 🔢
-- Scikit-learn 📊
-- TensorFlow 🧠
+- Python 🐍: Lenguaje principal de programación para todo el proyecto.
+- OpenCV 🎥: Utilizado para la captura de video desde la cámara y el procesamiento básico de imágenes.
+- MediaPipe ✋: Framework de Google para la detección y seguimiento de landmarks de manos en tiempo real.
+- NumPy 🔢: Esencial para el manejo eficiente de arrays numéricos, utilizado para almacenar y procesar los vectores de landmarks.
+- Scikit-learn 📊: Librería para machine learning, usada específicamente para el modelo KNN en el reconocimiento de señas estáticas y para dividir los datos.
+- TensorFlow 🧠: Plataforma de machine learning, utilizada a través de Keras para construir y entrenar el modelo LSTM para el reconocimiento de señas dinámicas.
 
 ---
+
 
 ## 📄 Licencia
 
