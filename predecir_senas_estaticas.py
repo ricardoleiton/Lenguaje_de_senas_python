@@ -1,4 +1,4 @@
-# === predecir_todas_letras.py ===
+# === predecir_senas_estaticas.py ===
 # Este script usa la cámara para predecir en tiempo real la letra que se está mostrando
 # con la mano, usando el modelo entrenado previamente.
 
@@ -8,8 +8,8 @@ import mediapipe as mp
 import pickle
 
 # === CONFIGURACIÓN ===
-MODEL_PATH = "modelo/knn_landmark.pkl"
-letters = "abcdefghijklmnopqrstuvwxyz"
+MODEL_PATH = "modelo/knn_senas_estaticas.pkl"
+letters = "abcdefghijklmnopqrstuvwxyz0123456789"
 
 # === CARGAR MODELO ENTRENADO ===
 with open(MODEL_PATH, "rb") as f:
@@ -21,7 +21,7 @@ hands = mp_hands.Hands(static_image_mode=False, max_num_hands=1)
 mp_draw = mp.solutions.drawing_utils
 
 # === ACTIVAR CÁMARA ===
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 print("🎥 Cámara activa. Mostrá una seña. Presioná 'q' para salir.")
 
 # === PROCESAR VIDEO EN VIVO ===
@@ -50,6 +50,10 @@ while cap.isOpened():
                 # Mostrar letra en pantalla
                 cv2.putText(frame, f"Letra: {predicted_letter.upper()}", (10, 40),
                             cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 0), 2)
+
+    # Mostrar leyenda para salir
+    cv2.putText(frame, "Presiona 'q' para salir", (10, 80),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (200, 200, 200), 2)
 
     cv2.imshow("Reconocimiento de señas (a-z)", frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):

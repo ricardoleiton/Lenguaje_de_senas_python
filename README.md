@@ -1,4 +1,3 @@
-
 # 🤟 Lenguaje de Señas con Python
 
 ![Python](https://img.shields.io/badge/Python-3.10-blue?logo=python)
@@ -12,9 +11,23 @@ Ideal para aplicaciones educativas o inclusivas en el reconocimiento del lenguaj
 
 ## 📁 Estructura del Proyecto
 
-- 📸 `capturar_landmarks.py`: Captura los puntos de referencia (landmarks) de la mano con MediaPipe.
-- 🧠 `entrenar_modelo.py`: Entrena un modelo de aprendizaje automático con los datos capturados.
-- 🔍 `predecir_todas_letras.py`: Predice en tiempo real la letra mostrada en lenguaje de señas.
+```
+├── modelo/
+│   ├── knn_senas_estaticas.pkl
+│   ├── lstm_senas_dinamicas.h5
+│   └── senas_dinamicas_labels.pkl
+├── senas_estaticas/
+├── senas_dinamicas/
+├── capturar_senas_estaticas.py
+├── capturar_senas_dinamicas.py
+├── entrenar_senas_estaticas_modelo.py
+├── entrenar_senas_dinamicas_modelo.py
+├── predecir_senas_estaticas.py
+├── predecir_senas_dinamicas.py
+├── LICENSE
+├── README.md
+└── requirements.txt
+```
 
 ---
 
@@ -25,6 +38,7 @@ Ideal para aplicaciones educativas o inclusivas en el reconocimiento del lenguaj
 - MediaPipe ✋
 - NumPy 🔢
 - Scikit-learn 📊
+- TensorFlow 🧠
 
 ---
 
@@ -45,8 +59,6 @@ Ideal para aplicaciones educativas o inclusivas en el reconocimiento del lenguaj
 
 ### 1. 🔃 Clonar el repositorio
 
-Abrí una terminal y ejecutá:
-
 ```bash
 git clone https://github.com/ricardoleiton/Lenguaje-de-senas-con-Python.git
 cd Lenguaje-de-senas-con-Python
@@ -54,48 +66,61 @@ cd Lenguaje-de-senas-con-Python
 
 ### 2. 📦 Instalar dependencias
 
-Instalá las bibliotecas necesarias ejecutando:
-
 ```bash
 pip install -r requirements.txt
 ```
 
-O si no tenés ese archivo, podés instalarlas manualmente:
+O instalarlas manualmente:
 
 ```bash
-pip install opencv-python mediapipe numpy scikit-learn
+pip install opencv-python mediapipe numpy scikit-learn tensorflow
 ```
 
 ---
 
-### 3. 📸 Capturar datos
+### 3. 📸 Capturar señas
 
-Ejecutá el script para capturar los landmarks de las manos (por letra):
-
+#### ✋ Estáticas (letras de la A a la Z y números del 0 al 9)
 ```bash
-python capturar_landmarks.py
+python capturar_senas_estaticas.py
 ```
+- Ingresá una letra o número.
+- Posicioná tu mano frente a la cámara.
+- Presioná **"c"** para comenzar o **"q"** para cancelar.
 
-Seguí las instrucciones en pantalla para grabar señas con tu cámara.
+#### 🤚 Dinámicas (palabras o frases en movimiento)
+```bash
+python capturar_senas_dinamicas.py
+```
+- Ingresá una palabra/frase sin espacios.
+- Posicioná tu mano y presioná **"c"** para comenzar o **"q"** para cancelar.
 
 ---
 
-### 4. 🧠 Entrenar el modelo
+### 4. 🧠 Entrenar los modelos
 
-Una vez tengas datos guardados en la carpeta `landmarks_data/`, ejecutá:
-
+#### Para señas estáticas:
 ```bash
-python entrenar_modelo.py
+python entrenar_senas_estaticas_modelo.py
 ```
 
-Esto generará un archivo `.pkl` con el modelo entrenado.
+#### Para gestos dinámicos:
+```bash
+python entrenar_senas_dinamicas_modelo.py
+```
 
 ---
 
-### 5. 🔍 Predecir señas en tiempo real
+### 5. 🔍 Predicción en tiempo real
 
-Probá el reconocimiento con la cámara ejecutando:
-
+#### Estáticas:
 ```bash
-python predecir_todas_letras.py
+python predecir_senas_estaticas.py
 ```
+
+#### Dinámicas:
+```bash
+python predecir_senas_dinamicas.py
+```
+
+---

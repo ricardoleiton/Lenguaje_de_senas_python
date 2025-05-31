@@ -9,8 +9,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 
 # === CONFIGURACIÓN ===
-DATA_DIR = "landmarks_data"  # Carpeta con los archivos .npy
-MODEL_PATH = "modelo/knn_landmark.pkl"
+DATA_DIR = "senas_estaticas"  # Carpeta con los archivos .npy
+MODEL_PATH = "modelo/knn_senas_estaticas.pkl"
 letters = "abcdefghijklmnopqrstuvwxyz"
 
 X, y = [], []  # X = vectores, y = etiquetas (números)
@@ -33,7 +33,7 @@ for idx, letter in enumerate(letters):
 
 # === VALIDAR QUE HAYA DATOS ===
 if not X:
-    raise RuntimeError("❌ No se encontraron vectores válidos en 'landmarks_data/'")
+    raise RuntimeError("❌ No se encontraron vectores válidos en 'senas_estaticas/'")
 
 X = np.array(X)
 y = np.array(y)
